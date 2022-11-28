@@ -1,5 +1,8 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import fs from 'fs';
 
-export default function handler(req, res) {
-  res.status(200).json({ name: 'John Doe' })
+export default async function getServerSideProps() {
+  await new Promise((resolve) => fs.stat('does-no-exist', () => resolve()));
+  return { msg: 'hello' };
 }
+
+export const config = { runtime: 'experimental-edge' };

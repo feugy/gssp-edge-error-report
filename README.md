@@ -1,34 +1,27 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## What is this?
 
-## Getting Started
+The edge runtime, used for running middleware file, can also be configured for running pages with `getServerSideProps()`. 
 
-First, run the development server:
+The edge runtime does not support Node.js built-in modules, like `fs` or `path`, so importing them fails.
+Middleware & API Route have a user-friendly error report, in such situation:
 
-```bash
-npm run dev
-# or
-yarn dev
+```shell
+Error: The edge runtime does not support Node.js 'fs' module.
+Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ideally, pages with gSSP should have the same. Current report is:
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```shell
+./pages/index.js:1:0
+Module not found: Can't resolve 'fs'
+> 1 | import fs from 'fs';
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+To reproduce, simply runs `pnpm build`: the build will fail with the error.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+To see how an API function reports the same error:
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. comment `runtime: 'experimental-edge'` in `next.config.js` 
+1. start dev server `pnpm dev`
+1. hit `http://localhost:3000/api/hello`
